@@ -152,6 +152,9 @@ private slots:
   void slotChangePage(QString&, QString&);
   void slotNextTab();
   void slotHideEdit();
+
+  void slotSimulateWithSpice();
+
 signals:
   void signalKillEmAll();
 
@@ -295,6 +298,7 @@ public:
           *addToProj, *editFind, *insEntity, *selectMarker,
           *createLib, *importData, *graph2csv, *createPkg, *extractPkg,
           *callAtt, *callRes, *centerHor, *centerVert, *loadModule, *buildModule;
+  QAction *simSpice;
 
 public slots:
   void slotEditRotate(bool);  // rotate the selected items
