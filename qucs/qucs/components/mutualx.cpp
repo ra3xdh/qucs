@@ -172,12 +172,18 @@ void MutualX::createSymbol()
 					      false, 
 					      QObject::tr("inductance of coil") + " " + QString::number(Num-i)));
       }
-
-      int d_kcnt = NumProps - oldNumProps - dCoils;
-      for (int i=0;i<d_kcnt;i++) {
-          Props.append(new Property("k", "0.9", false, " "));
+      int curridx = Num + 1; // point to the first k (after the last coil)
+      int maxp = Num - 1; // number of k needed on the current row
+      while (curridx < NumProps) {
+        if (maxp > dCoils) {
+          curridx += (maxp-dCoils); // move at the end of the existing k
+	}
+        for(int i = 0; (i < dCoils) && (i < maxp); i++) {
+          Props.insert(curridx, new Property("k", "0.9", false, " "));
+          curridx++;
+        }
+        maxp--; // next row has one less coupling coefficient
       }
-
     }
   }
 
