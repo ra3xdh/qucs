@@ -473,6 +473,7 @@ void Module::registerModules (void) {
   REGISTER_SPICE_SIM_1 (SpiceFourier);
   REGISTER_SPICE_SIM_1 (SpiceDisto);
   REGISTER_SPICE_SIM_1 (SpiceCustomSim);
+  REGISTER_SPICE_SIM_1 (SpiceNoise);
 
 
   // paintings

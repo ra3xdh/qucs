@@ -372,6 +372,45 @@ void AbstractSpiceKernel::parseFourierOutput(QString ngspice_file, QList<QList<d
 }
 
 /*!
+ * \brief AbstractSpiceKernel::parseNoiseOutput Parse output of .NOISE simulation.
+ * \param[in] ngspice_file Spice output file name
+ * \param[out] sim_points 2D array in which simulation points should be extracted. All simulation
+ *        points from all sweep variable steps are extracted in a single array
+ * \param[out] var_list This list is filled by simualtion variables. There is a list of dependent
+ *        and independent varibales. An independent variable is the first in list.
+ * \param[out] ParSwp Set to true if there was parameter sweep
+ */
+void AbstractSpiceKernel::parseNoiseOutput(QString ngspice_file, QList<QList<double> > &sim_points,
+                                           QStringList &var_list, bool &ParSwp)
+{
+    var_list.append(""); // dummy indep var
+    var_list.append("inoise_total");
+    var_list.append("onoise_total");
+
+    ParSwp = false;
+    QFile ofile(ngspice_file);
+    if (ofile.open(QFile::ReadOnly)) {
+        QTextStream ngsp_data(&ofile);
+        sim_points.clear();
+        int cnt = 0;
+        while (!ngsp_data.atEnd()) {
+            QString line = ngsp_data.readLine();
+            if (line.contains('=')) {
+                QList <double> sim_point;
+                sim_point.append(0.0d);
+                sim_point.append(line.section('=',1,1).toDouble());
+                line = ngsp_data.readLine();
+                sim_point.append(line.section('=',1,1).toDouble());
+                sim_points.append(sim_point);
+                cnt++;
+            }
+        }
+        if (cnt>1) ParSwp = true;
+        ofile.close();
+    }
+}
+
+/*!
  * \brief AbstractSpiceKernel::parseSTEPOutput This method parses text raw spice
  *        output from Parameter sweep analysis. Can parse data that uses appedwrite.
  *        Extracts a simulation points array and variables names and types (Real
@@ -571,6 +610,14 @@ void AbstractSpiceKernel::convertToQucsData(const QString &qucs_dataset, bool xy
                 isComplex = true;
             } else if (ngspice_output_filename.endsWith(".four")) {
                 parseFourierOutput(full_outfile,sim_points,var_list,xyce);
+            } else if (ngspice_output_filename.endsWith(".noise")) {
+                isComplex = false;
+                parseNoiseOutput(full_outfile,sim_points,var_list,hasParSweep);
+                if (hasParSweep) {
+                    QString res_file = QDir::convertSeparators(workdir + QDir::separator()
+                                                            + "spice4qucs.noise.cir.res");
+                    parseResFile(res_file,swp_var,swp_var_val);
+                }
             } else if (ngspice_output_filename.endsWith("_swp.txt")) {
                 hasParSweep = true;
                 QString simstr = full_outfile;
@@ -617,18 +664,21 @@ void AbstractSpiceKernel::convertToQucsData(const QString &qucs_dataset, bool xy
                 int indep_cnt;
                 if (hasDblParSweep) indep_cnt =  sim_points.count()/(swp_var_val.count()*swp_var2_val.count());
                 else indep_cnt = sim_points.count()/swp_var_val.count();
-                ds_stream<<QString("<indep %1 %2>\n").arg(indep).arg(indep_cnt); // output indep var: TODO: parameter sweep
-                for (int i=0;i<indep_cnt;i++) {
-                    ds_stream<<QString::number(sim_points.at(i).at(0),'e',12)<<endl;
+                if (!indep.isEmpty()) {
+                    ds_stream<<QString("<indep %1 %2>\n").arg(indep).arg(indep_cnt); // output indep var: TODO: parameter sweep
+                    for (int i=0;i<indep_cnt;i++) {
+                        ds_stream<<QString::number(sim_points.at(i).at(0),'e',12)<<endl;
+                    }
+                    ds_stream<<"</indep>\n";
                 }
-                ds_stream<<"</indep>\n";
 
                 ds_stream<<QString("<indep %1 %2>\n").arg(swp_var).arg(swp_var_val.count());
                 foreach (QString val,swp_var_val) {
                     ds_stream<<val<<endl;
                 }
                 ds_stream<<"</indep>\n";
-                indep += " " + swp_var;
+                if (indep.isEmpty()) indep = swp_var;
+                else indep += " " + swp_var;
                 if (hasDblParSweep) {
                     ds_stream<<QString("<indep %1 %2>\n").arg(swp_var2).arg(swp_var2_val.count());
                     foreach (QString val,swp_var2_val) {
@@ -637,7 +687,7 @@ void AbstractSpiceKernel::convertToQucsData(const QString &qucs_dataset, bool xy
                     ds_stream<<"</indep>\n";
                     indep += " " + swp_var2;
                 }
-            } else {
+            } else if (!indep.isEmpty()) {
                 ds_stream<<QString("<indep %1 %2>\n").arg(indep).arg(sim_points.count()); // output indep var: TODO: parameter sweep
                 foreach (sim_point,sim_points) {
                     ds_stream<<QString::number(sim_point.at(0),'e',12)<<endl;
@@ -646,7 +696,8 @@ void AbstractSpiceKernel::convertToQucsData(const QString &qucs_dataset, bool xy
             }
 
             for(int i=1;i<var_list.count();i++) { // output dep var
-                ds_stream<<QString("<dep %1 %2>\n").arg(var_list.at(i)).arg(indep);
+                if (indep.isEmpty()) ds_stream<<QString("<indep %1 %2>\n").arg(var_list.at(i)).arg(sim_points.count());
+                else ds_stream<<QString("<dep %1 %2>\n").arg(var_list.at(i)).arg(indep);
                 foreach (sim_point,sim_points) {
                     if (isComplex) {
                         double re=sim_point.at(2*(i-1)+1);
@@ -661,7 +712,8 @@ void AbstractSpiceKernel::convertToQucsData(const QString &qucs_dataset, bool xy
                         ds_stream<<QString::number(sim_point.at(i),'e',12)<<endl;
                     }
                 }
-                ds_stream<<"</dep>\n";
+                if (indep.isEmpty()) ds_stream<<"</indep>\n";
+                else ds_stream<<"</dep>\n";
             }
             hasParSweep = false;
         }
