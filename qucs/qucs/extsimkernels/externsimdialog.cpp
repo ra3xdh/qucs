@@ -84,17 +84,17 @@ ExternSimDialog::ExternSimDialog(Schematic *sch,QWidget *parent) :
 
     QLabel *lbl_warn = new QLabel(this);
     lbl_warn->setAutoFillBackground(true);
+    lbl_warn->setOpenExternalLinks(true);
     lbl_warn->setStyleSheet("background-color: #F0FFFF; border: 3px solid red ;");
     lbl_warn->setText("<HTML>"
                       "<CENTER>"
                       "<FONT color = #FF0000>"
-                      "External simulators support is unstable. <BR>"
-                      "Use on your own risk! It will be stable in <BR>"
-                      "the next relases. See spice4qucs initiative <BR>"
-                      " documentation "
-                      "<A href=\"https://qucs-help.readthedocs.org/en/spice4qucs/\"> here </A>"
-                      "for more info <BR>"
-                      "and development status"
+                      "External simulator support is experimental and could be unstable. <BR>"
+                      "Use it at your own risk! Future release are likely to be more stable. <BR>"
+                      "See spice4qucs-help documentation at <BR>"
+                      "<A href=\"http://qucs-help.readthedocs.org/en/spice4qucs/index.html/\">"
+                      "http://qucs-help.readthedocs.org/en/spice4qucs/index.html/</A> <BR>"
+                      "for more information and the current development status."
                       "</FONT>"
                       "</CENTER>"
                       "</HTML>");
