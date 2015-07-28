@@ -75,6 +75,7 @@
 #include "imagewriter.h"
 #include "../qucs-lib/qucslib_common.h"
 #include "misc.h"
+#include "extsimkernels/verilogawriter.h"
 
 // icon for unsaved files (diskette)
 const char *smallsave_xpm[] = {
@@ -2825,4 +2826,32 @@ void QucsApp::slotAfterSpiceSimulation()
     Schematic *sch = (Schematic*)DocumentTab->currentPage();
     sch->reloadGraphs();
     sch->viewport()->update();
+}
+
+void QucsApp::slotBuildVAModule()
+{
+    if (!isTextDocument(DocumentTab->currentPage())) {
+        Schematic *Sch = (Schematic*)DocumentTab->currentPage();
+
+        QFileInfo inf(Sch->DocName);
+        QString filename = QFileDialog::getSaveFileName(this,tr("Save Verilog-A module"),
+                                                        inf.path()+QDir::separator()+"testmodule.va",
+                                                        "Verilog-A (*.va)");
+        if (filename.isEmpty()) return;
+
+        QFile f(filename);
+        if (f.open(QIODevice::WriteOnly)) {
+            QTextStream stream(&f);
+            VerilogAwriter *writer = new VerilogAwriter;
+            if (!writer->createVA_module(stream,Sch)) {
+                QMessageBox::critical(this,tr("Build Verilog-A module"),
+                                      tr("This schematic is not a subcircuit!\n"
+                                         "Use subcircuit to crete Verilog-A module!"),
+                                          QMessageBox::Ok);
+            }
+            delete writer;
+            f.close();
+        }
+    }
+
 }

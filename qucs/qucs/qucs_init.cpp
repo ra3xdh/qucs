@@ -610,6 +610,9 @@ void QucsApp::initActions()
 
   simSpice = new QAction(tr("Simulate with spice"),this);
   connect(simSpice,SIGNAL(activated()),SLOT(slotSimulateWithSpice()));
+  buildVAModule = new QAction(tr("Build Verilog-A module from subcircuit"),this);
+  connect(buildVAModule,SIGNAL(activated()),SLOT(slotBuildVAModule()));
+
 
   viewToolBar = new QAction(tr("Tool&bar"), this);
   viewToolBar->setCheckable(true);
@@ -685,6 +688,8 @@ void QucsApp::initMenuBar()
   fileMenu->addAction(exportAsImage);
   fileMenu->addAction(filePrint);
   fileMenu->addAction(filePrintFit);
+  fileMenu->insertSeparator();
+  fileMenu->addAction(buildVAModule);
   fileMenu->insertSeparator();
   fileMenu->addAction(fileExamples);
   fileMenu->insertSeparator();
