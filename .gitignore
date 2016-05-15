@@ -143,7 +143,6 @@ qrc_*.cxx
 *.jar
 *.rar
 *.tar
-*.zip
 
 # Logs and databases #
 ######################
