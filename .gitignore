@@ -185,6 +185,13 @@ CMakeLists.txt.user
 # ignore schematics, data display and data
 *.sch
 *.sch~
+*.o
+*.cpp~
+*.h~
+qucsactivefilter
+*.pro.user
+Makefile
+moc_*.cpp
 *.dat
 *.dat.ngspice
 *.dat.xyce
