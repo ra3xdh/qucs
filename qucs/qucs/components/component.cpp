@@ -1248,6 +1248,24 @@ void Component::copyComponent(Component *pc)
 }
 
 
+/*!
+ * \brief Component::convertEntry Hackish function for backward compatibility of new XML companents
+ *        and old C++ hardcoded components. Look for old component definitions and replace it with
+ *        new ones.
+ * \param s
+ * \return Corrected component entry
+ */
+QString Component::convertEntry(QString s)
+{
+    if (s.startsWith("<R ")) {
+        s.remove(0,3);
+        s = "<Lib " + s;
+        int p = s.indexOf('"');
+        s.insert(p,"\"RCL\" 1 \"res\" 1 ");
+    }
+    return s;
+}
+
 // ***********************************************************************
 // ********                                                       ********
 // ********          Functions of class MultiViewComponent        ********
@@ -1550,6 +1568,7 @@ Component* getComponentFromName(QString& Line, Schematic* p)
   Component *c = 0;
 
   Line = Line.trimmed();
+  Line = Component::convertEntry(Line);
   if(Line.at(0) != '<') {
     QMessageBox::critical(0, QObject::tr("Error"),
 			QObject::tr("Format Error:\nWrong line start!"));

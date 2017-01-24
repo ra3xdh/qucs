@@ -94,6 +94,8 @@ protected:
   void copyComponent(Component*);
   Property * getProperty(const QString&);
   Schematic* containingSchematic;
+public:
+  static QString convertEntry(QString s);
 };
 
 
