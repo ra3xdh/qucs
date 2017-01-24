@@ -87,8 +87,11 @@ int LibComp::loadSection(const QString& Name, QString& Section,
 {
   QDir Directory(QucsSettings.LibDir);
   QFile file(Directory.absFilePath(Props.first()->Value + ".lib"));
-  if(!file.open(QIODevice::ReadOnly))
-    return -1;
+  if(!file.open(QIODevice::ReadOnly)) {
+      Directory.setPath(QucsSettings.SysLibDir);
+      file.setFileName(Directory.absFilePath(Props.first()->Value + ".lib"));
+      if(!file.open(QIODevice::ReadOnly)) return -1;
+  }
 
   QString libDefaultSymbol;
 
@@ -277,14 +280,29 @@ QString LibComp::createType()
 // -------------------------------------------------------
 QString LibComp::netlist()
 {
-  QString s = "Sub:"+Name;   // output as subcircuit
 
-  // output all node names
-  foreach(Port *p1, Ports)
-    s += " "+p1->Connection->Name;   // node names
+  QString s,entry;
+  QStringList Includes;
+  int r = loadSection("Netlist",entry,&Includes);
+  if (r>=0) {
+      s = entry;
+      s = s.trimmed(); // remove traling whitespaces and the newline char
+      s.replace("%name ",Name+" ");
+      int Np = Ports.count();
+      for(int i = Np;i>=1;i--) {
+          QString wilcard = QString("%n%1").arg(i);
+          s.replace(wilcard,Ports.at(i-1)->Connection->Name);
+      }
+  } else {
+      s = "Sub:"+Name;   // output as subcircuit
 
-  // output property
-  s += " Type=\""+createType()+"\"";   // type for subcircuit
+      // output all node names
+      foreach(Port *p1, Ports)
+        s += " "+p1->Connection->Name;   // node names
+
+      // output property
+      s += " Type=\""+createType()+"\"";   // type for subcircuit
+  }
 
   // output user defined parameters
   for(Property *pp = Props.at(2); pp != 0; pp = Props.next())

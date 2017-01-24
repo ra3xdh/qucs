@@ -699,6 +699,7 @@ int main(int argc, char *argv[])
   }else{
 	  QucsSettings.LibDir =      QucsDir.canonicalPath() + "/share/qucs/library/";
   }
+  QucsSettings.SysLibDir =      QucsDir.canonicalPath() + "/share/qucs/syslibrary/";
   QucsSettings.OctaveDir =   QucsDir.canonicalPath() + "/share/qucs/octave/";
   QucsSettings.ExamplesDir = QucsDir.canonicalPath() + "/share/qucs/examples/";
   QucsSettings.DocDir =      QucsDir.canonicalPath() + "/share/qucs/docs/";
