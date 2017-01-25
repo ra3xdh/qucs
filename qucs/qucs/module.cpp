@@ -223,7 +223,7 @@ void Module::intoCategory (Module * m) {
 void Module::registerModules (void) {
 
   // lumped components
-  REGISTER_LUMPED_2 (Resistor, info, info_us);
+  // REGISTER_LUMPED_2 (Resistor, info, info_us);
   REGISTER_LUMPED_1 (Capacitor);
   REGISTER_LUMPED_1 (Inductor);
   REGISTER_LUMPED_1 (Ground);

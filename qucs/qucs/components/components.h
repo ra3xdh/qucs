@@ -23,7 +23,7 @@
 #include "component.h"
 
 #include "ground.h"
-#include "resistor.h"
+//#include "resistor.h"
 #include "capacitor.h"
 #include "inductor.h"
 #include "dcblock.h"

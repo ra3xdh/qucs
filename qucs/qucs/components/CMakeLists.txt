@@ -9,7 +9,7 @@ SET(COMPONENTS_SRCS
 DLS_1ton.cpp		dff_SR.cpp		logical_buf.cpp		potentiometer.cpp
 DLS_nto1.cpp		diac.cpp		logical_inv.cpp		rectline.cpp
 EKV26MOS.cpp		digi_sim.cpp		logical_nand.cpp	relais.cpp
-digi_source.cpp		logical_nor.cpp		resistor.cpp
+digi_source.cpp		logical_nor.cpp		#resistor.cpp
 MESFET.cpp		diode.cpp		logical_or.cpp		rfedd.cpp
 ac_sim.cpp		dmux2to4.cpp		logical_xnor.cpp	rfedd2p.cpp
 am_modulator.cpp	dmux3to8.cpp		logical_xor.cpp		rlcg.cpp
@@ -182,7 +182,7 @@ pm_modulator.h
 potentiometer.h
 rectline.h
 relais.h
-resistor.h
+#resistor.h
 rfedd.h
 rfedd2p.h
 rlcg.h
