@@ -604,6 +604,15 @@ void QucsApp::fillComboBox (bool setAll)
   if (!setAll) {
     CompChoose->insertItem(CompChoose->count(), QObject::tr("paintings"));
   } else {
+    SysLibLst.clear();
+    QDir syslibdir(QucsSettings.SysLibDir);
+    QStringList syslibs = syslibdir.entryList("*.lib");
+    foreach(QString l,syslibs) {
+        l.chop(4);
+        CompChoose->insertItem(CompChoose->count(), l);
+        SysLibLst.append(l);
+    }
+
     QStringList cats = Category::getCategories ();
     foreach (QString it, cats) {
       CompChoose->insertItem(CompChoose->count(), it);
@@ -689,6 +698,20 @@ void QucsApp::slotSetCompView (int index)
       CompComps->addItem(icon);
       compIdx++;
     }
+  } else if (SysLibLst.contains(item)) {
+      // System library device
+      ComponentLibrary parsedlibrary;
+      QString libPath = QucsSettings.SysLibDir + QDir::separator() + item;
+      int result = parseComponentLibrary (libPath , parsedlibrary);
+      if (result == QUCS_COMP_LIB_OK) {
+          foreach(ComponentLibraryItem c,parsedlibrary.components) {
+              QListWidgetItem *icon = new QListWidgetItem(QPixmap(QucsSettings.SysLibDir + "/icons/"
+                                                                  + c.name + ".png"), c.name);
+              icon->setToolTip(c.name);
+              CompComps->addItem(icon);
+          }
+      }
+
   } else {
     // static components
     char * File;
@@ -870,6 +893,16 @@ void QucsApp::slotSelectComponent(QListWidgetItem *item)
   QString CompName;
   QString CompFile_qstr;
   char *CompFile_cptr;
+
+  QString compgr = CompChoose->currentText();
+  if(SysLibLst.contains(compgr)) {
+      LibComp *libpc = new LibComp();
+      libpc->Props.at(0)->Value = compgr;
+      libpc->Props.at(1)->Value = name;
+      libpc->createSymbol();
+      view->selElem = (Element *) libpc;
+      return;
+  }
 
   qDebug() << "pressed CompComps id" << i << name;
   QVariant v = CompComps->item(i)->data(Qt::UserRole);

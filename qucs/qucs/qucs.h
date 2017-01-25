@@ -192,6 +192,7 @@ private:
   QLineEdit       *CompSearch;
   QPushButton     *CompSearchClear;
   QComboBox       *CompChoose;
+  QStringList      SysLibLst;
 
 // ********** Properties ************************************************
   QStack<QString> HierarchyHistory; // keeps track of "go into subcircuit"

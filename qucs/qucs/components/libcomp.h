@@ -32,12 +32,12 @@ public:
 
   bool createSubNetlist(QTextStream *, QStringList&, int type=1);
   QString getSubcircuitFile();
+  void createSymbol();
 
 protected:
   QString netlist();
   QString vhdlCode(int);
   QString verilogCode(int);
-  void createSymbol();
 
 private:
   int  loadSymbol();
