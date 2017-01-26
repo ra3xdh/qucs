@@ -1,6 +1,6 @@
 <Qucs Library 0.0.19 "RCL">
 
-<Component res>
+<Component Resistor>
   <Description>
 Resistor
   </Description>

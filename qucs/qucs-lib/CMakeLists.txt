@@ -84,6 +84,7 @@ INSTALL(TARGETS qucslib
     )
 
 ADD_SUBDIRECTORY( library )
+ADD_SUBDIRECTORY( syslibrary )
 
 # man pages
 INSTALL( FILES qucslib.1 DESTINATION share/man/man1 )
