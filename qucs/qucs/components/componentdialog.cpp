@@ -66,7 +66,7 @@ ComponentDialog::ComponentDialog(QucsApp* App_, Component *c, SchematicScene *d)
   checkSim  = 0;  comboSim  = 0;  comboType  = 0;  checkParam = 0;
   editStart = 0;  editStop = 0;  editNumber = 0;
   
-  Property *pp = 0; // last property shown elsewhere outside the properties table, not to put in TableView
+  auto pp = Comp->Props.begin(); // last property shown elsewhere outside the properties table, not to put in TableView
   // ...........................................................
   // if simulation component: .TR, .AC, .SW, (.SP ?)
   if((Comp->obsolete_model_hack()[0] == '.') &&
@@ -202,15 +202,15 @@ ComponentDialog::ComponentDialog(QucsApp* App_, Component *c, SchematicScene *d)
       s = Comp->Props.first()->Value;
       checkType->setChecked(Comp->Props.first()->display);
     }
-    pp = Comp->Props.at(1);
-    editStart->setText(pp->Value);
-    checkStart->setChecked(pp->display);
-    pp = Comp->Props.at(2);
-    editStop->setText(pp->Value);
-    checkStop->setChecked(pp->display);
-    pp = Comp->Props.at(3);  // remember last property for ListView
-    editNumber->setText(pp->Value);
-    checkNumber->setChecked(pp->display);
+    pp++;
+    editStart->setText((*pp)->Value);
+    checkStart->setChecked((*pp)->display);
+    pp++;
+    editStop->setText((*pp)->Value);
+    checkStop->setChecked((*pp)->display);
+    pp++;  // remember last property for ListView
+    editNumber->setText((*pp)->Value);
+    checkNumber->setChecked((*pp)->display);
 
     int tNum = 0;
     if(s[0] == 'l') {
@@ -436,10 +436,10 @@ ComponentDialog::ComponentDialog(QucsApp* App_, Component *c, SchematicScene *d)
   int row=0; // row counter
   //for(Property *p = Comp->Props.at(Comp->Props.find(pp)+1); p != 0; p = Comp->Props.next()) {
   TODO("check legacy access to Props");
-  Property *p;
-  for(int i = 0; i <= Comp->Props.size()-1; i++) {
+  pp++;
+  for(; pp != Comp->Props.end(); pp++) {
 
-      p = Comp->Props.at(i);
+      Property *p = *pp;
 
       // do not insert if already on first tab
       // this is the reason it was originally from back to front...
@@ -857,27 +857,27 @@ void ComponentDialog::slotApplyInput()
    *  Only check if the widgets were created (pointers checks are 'true')
    */
   bool display;
-  int pnum = 0;
-  Property *pp = Comp->Props.at(pnum);
+  //int pnum = 0;
+  auto pp = Comp->Props.begin();
   // apply all the new property values
 
   if(comboSim) {
     display = checkSim->isChecked();
-    if(pp->display != display) {
-      pp->display = display;
+    if((*pp)->display != display) {
+      (*pp)->display = display;
       changed = true;
     }
-    if(pp->Value != comboSim->currentText()) {
-      pp->Value = comboSim->currentText();
+    if((*pp)->Value != comboSim->currentText()) {
+      (*pp)->Value = comboSim->currentText();
       changed = true;
     }
-    pnum += 1 ;
+    pp++ ;
   }
-  pp = Comp->Props.at(pnum);
+  //(*pp) = Comp->Props.at(pnum);
   if(comboType) {
     display = checkType->isChecked();
-    if(pp->display != display) {
-      pp->display = display;
+    if((*pp)->display != display) {
+      (*pp)->display = display;
       changed = true;
     }
     switch(comboType->currentIndex()) {
@@ -886,98 +886,95 @@ void ComponentDialog::slotApplyInput()
       case 3:  tmp = "const"; break;
       default: tmp = "lin";   break;
     }
-    if(pp->Value != tmp) {
-      pp->Value = tmp;
+    if((*pp)->Value != tmp) {
+      (*pp)->Value = tmp;
       changed = true;
     }
-    pnum += 1;
+    pp++;
   }
-  pp = Comp->Props.at(pnum);
+  //pp = Comp->Props.at(pnum);
   if(checkParam) if(checkParam->isEnabled()) {
     display = checkParam->isChecked();
-    if(pp->display != display) {
-      pp->display = display;
+    if((*pp)->display != display) {
+      (*pp)->display = display;
       changed = true;
     }
-    if(pp->Value != editParam->text()) {
-      pp->Value = editParam->text();
+    if((*pp)->Value != editParam->text()) {
+      (*pp)->Value = editParam->text();
       changed = true;
     }
-    pnum += 1;
+    pp++;
   }
-  pp = Comp->Props.at(pnum);
+  //pp = Comp->Props.at(pnum);
   if(editStart) {
     if(comboType->currentIndex() < 2) {
       display = checkStart->isChecked();
-      if(pp->display != display) {
-        pp->display = display;
+      if((*pp)->display != display) {
+        (*pp)->display = display;
         changed = true;
       }
-      pp->Name  = "Start";
-      if(pp->Value != editStart->text()) {
-        pp->Value = editStart->text();
+      (*pp)->Name  = "Start";
+      if((*pp)->Value != editStart->text()) {
+        (*pp)->Value = editStart->text();
         changed = true;
       }
-      pnum += 1;
-      pp = Comp->Props.at(pnum);
+
+      pp++;
 
       display = checkStop->isChecked();
-      if(pp->display != display) {
-        pp->display = display;
+      if((*pp)->display != display) {
+        (*pp)->display = display;
         changed = true;
       }
-      pp->Name  = "Stop";
-      if(pp->Value != editStop->text()) {
-        pp->Value = editStop->text();
+      (*pp)->Name  = "Stop";
+      if((*pp)->Value != editStop->text()) {
+        (*pp)->Value = editStop->text();
         changed = true;
       }
-      pnum += 1;
-      pp = Comp->Props.at(pnum);
+
+      pp++;
 
       display = checkNumber->isChecked();
-      if(pp->display != display) {
-        pp->display = display;
+      if((*pp)->display != display) {
+        (*pp)->display = display;
         changed = true;
       }
-      if((pp->Value != editNumber->text()) || (pp->Name != "Points")) {
-        pp->Value = editNumber->text();
-        pp->Name  = "Points";
+      if(((*pp)->Value != editNumber->text()) ||
+         ((*pp)->Name != "Points")) {
+        (*pp)->Value = editNumber->text();
+        (*pp)->Name  = "Points";
         changed = true;
       }
       qDebug() << "====> before ad"
-               << pp->Description;
+               << (*pp)->Description;
 
-      pnum += 1;
-      pp = Comp->Props.at(pnum);
+      pp++;
     }
     else {
       // If a value list is used, the properties "Start" and "Stop" are not
       // used. -> Call them "Symbol" to omit them in the netlist.
-      pp->Name = "Symbol";
-      pp->display = false;
-      pnum += 1;
-      pp = Comp->Props.at(pnum);
-      pp->Name = "Symbol";
-      pp->display = false;
-      pnum += 1;
-      pp = Comp->Props.at(pnum);
+      (*pp)->Name = "Symbol";
+      (*pp)->display = false;
+      pp++;
+      (*pp)->Name = "Symbol";
+      (*pp)->display = false;
+      pp++;
 
       display = checkValues->isChecked();
-      if(pp->display != display) {
-        pp->display = display;
+      if((*pp)->display != display) {
+         (*pp)->display = display;
         changed = true;
       }
       tmp = "["+editValues->text()+"]";
-      if((pp->Value != tmp) || (pp->Name != "Values")) {
-        pp->Value = tmp;
-        pp->Name  = "Values";
+      if(((*pp)->Value != tmp) || ((*pp)->Name != "Values")) {
+        (*pp)->Value = tmp;
+        (*pp)->Name  = "Values";
         changed = true;
       }
       qDebug() << "====> before ad"
-               << pp;
+               << (*pp);
 
-      pnum += 1;
-      pp = Comp->Props.at(pnum);
+      pp++;
     }
   }
 
@@ -1017,24 +1014,23 @@ void ComponentDialog::slotApplyInput()
        qDebug() << "====>" <<name << value
                 << Comp->Props.size()
                 << prop->rowCount() +1
-                << pp;
+                << (*pp);
 
        display = (disp == tr("yes"));
-       if( pp ) {
-
-         if(pp->display != display) {
-             pp->display = display;
+       if( (*pp) ) {
+         if((*pp)->display != display) {
+            (*pp)->display = display;
              changed = true;
          }
-         if(pp->Value != value) {
-            pp->Value = value;
+         if((*pp)->Value != value) {
+            (*pp)->Value = value;
             changed = true;
          }
-         if(pp->Name != name) {
-           pp->Name = name;   // override if previous one was removed
+         if((*pp)->Name != name) {
+            (*pp)->Name = name;   // override if previous one was removed
            changed = true;
          }
-         pp->Description = desc;
+         (*pp)->Description = desc;
          }
        else {
          // if properties where added in the dialog
@@ -1047,8 +1043,7 @@ void ComponentDialog::slotApplyInput()
          }
     }
 
-    pnum += 1;
-    pp = Comp->Props.at(pnum);
+    pp++;
   }
 
   // original Comp still has properties? (removed some in the dialog?)
